@@ -13,31 +13,40 @@ def base(request):
 
     articles = soup.find_all('article')
 
-    try:
-        check_date = Post.objects.order_by('post_date').first()
-        print(check_date)
-    except:
+    check_date = Post.objects.filter().order_by('post_date').last()
+    print(check_date)
+
+    if check_date:
+        print('@@@@@@@@@@@@@')
+        for article in articles:
+            post_date = article.find('span').get_text()
+            post_date_time = datetime.datetime.strptime(post_date[:10], '%d.%m.%Y').date()
+            post_title = article.find('h1').get_text()
+            post_link = article.find('a')['href']
+            print(type(post_date_time))
+            print(type(check_date.post_date))
+
+            if post_date_time < check_date.post_date:
+                break
+
+            elif post_date_time > check_date.post_date:
+                posts.append(Post(post_date = post_date_time, post_title = post_title, post_link = post_link))
+
+            elif post_date_time == check_date.post_date:
+                if post_title == check_date.post_title:
+                    pass
+                else:
+                    posts.append(Post(post_date = post_date_time, post_title = post_title, post_link = post_link))
+        print(posts)
+    else:
         print("!!!!!!!!!!!")
         for article in articles:
             post = {}
             post_date = article.find('span').get_text()
-            post_date_time = datetime.datetime.strptime(post_date, '%d.%m.%Y / %H:%M')
+            post_date_time = datetime.datetime.strptime(post_date[:10], '%d.%m.%Y').date()
             post_title = article.find('h1').get_text()
             post_link = article.find('a')['href']
             posts.append(Post(post_date = post_date_time, post_title = post_title, post_link = post_link))
-    else:
-        print('@@@@@@@@@@@@@')
-        for article in articles:
-            post = {}
-            post_date = article.find('span').get_text()
-            post_date_time = datetime.datetime.strptime(post_date, '%d.%m.%Y / %H:%M')
-            print(post_date_time)
-            if post_date_time < check_date.post_date:
-                break
-            else:
-                post_title = article.find('h1').get_text()
-                post_link = article.find('a')['href']
-                posts.append(Post(post_date = post_date_time, post_title = post_title, post_link = post_link))
 
         # print("заголовок", post_title)
         # print("дата", post_date)
@@ -54,7 +63,7 @@ def base(request):
         #     print(paragraph)
         #     print()
 
-    Post.objects.bulk_create(posts, ignore_conflicts = True)
+    Post.objects.bulk_create(posts)
 
     try:
         period = int(request.GET['period'])
