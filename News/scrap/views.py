@@ -12,23 +12,31 @@ def base(request):
     posts = []
 
     articles = soup.find_all('article')
-    for article in articles:
-        post = {}
-        post_date = article.find('span').get_text()
-        post_date_time = datetime.datetime.strptime(post_date, '%d.%m.%Y / %H:%M')
-        post_title = article.find('h1').get_text()
-        post_link = article.find('a')['href']
+   
     try:
         check_date = Post.objects.latest('post_date')
     except:
-        pass
+        for article in articles:
+        	post = {}
+        	post_date = article.find('span').get_text()
+        	post_date_time = datetime.datetime.strptime(post_date, '%d.%m.%Y / %H:%M')
+        	post_title = article.find('h1').get_text()
+        	post_link = article.find('a')['href']
+        	
     else:
-        if post_date_time < check_date[0].post_date:
-            break
-
+        for article in articles:
+        	post = {}
+        	post_date = article.find('span').get_text()
+        	post_date_time = datetime.datetime.strptime(post_date, '%d.%m.%Y / %H:%M')
+        	print(type(post_date_time))
+        	print(type(check_date.post_date))
+        	if post_date_time < check_date.post_date:
+        	    break
+        	else:
+        	    post_title = article.find('h1').get_text()
+        	    post_link = article.find('a')['href']
+        		
     posts.append(Post(post_date = post_date_time, post_title = post_title, post_link = post_link))
-
-
         # print("заголовок", post_title)
         # print("дата", post_date)
         # print("ссылка", post_link)
@@ -43,9 +51,14 @@ def base(request):
         #     paragraph = paragraphs[i].get_text()
         #     print(paragraph)
         #     print()
+        
+    Post.objects.bulk_create(posts, ignore_conflicts = True)
+    
+    try:
+        period = int(request.GET['period'])
+    except:
+        q = Post.objects.all().order_by('post_date')[:20]
+    else:
+        q = Post.objects.all().order_by('post_date')[:period]
 
-    Post.objects.bulk_create(posts)
-
-    q = Post.objects.all().order_by('post_date')[:int(requests.GET['period'])]
-
-    return render (request, 'scrap/base.html', q)
+    return render (request, 'scrap/base.html', context= {'q':q})
