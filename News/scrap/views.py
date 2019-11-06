@@ -17,11 +17,10 @@ def base(request):
     for new in posts:
         posts_names.append(new.post_title)
 
-    if check_date:
-        print('@@@@@@@@@@@@@')
+    if (check_date):
         for article in articles:
             post_date = article.find('span').get_text()
-            post_date_time = datetime.datetime.strptime(post_date[:10], '%d.%m.%Y').date()
+            post_date_time = datetime.datetime.strptime(post_date, '%d.%m.%Y / %H:%M')
             post_title = article.find('h1').get_text()
             post_link = article.find('a')['href']
 
@@ -38,13 +37,12 @@ def base(request):
                 else:
                     new_post = Post(post_date = post_date_time, post_title = post_title, post_link = post_link)
                     new_post.save()
-        print(posts)
+
     else:
-        print("!!!!!!!!!!!")
         for article in articles:
             post = {}
             post_date = article.find('span').get_text()
-            post_date_time = datetime.datetime.strptime(post_date[:10], '%d.%m.%Y').date()
+            post_date_time = datetime.datetime.strptime(post_date, '%d.%m.%Y / %H:%M')
             post_title = article.find('h1').get_text()
             post_link = article.find('a')['href']
             new_post = Post(post_date = post_date_time, post_title = post_title, post_link = post_link)
