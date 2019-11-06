@@ -37,6 +37,7 @@ def base(request):
         	    post_link = article.find('a')['href']
         		
     posts.append(Post(post_date = post_date_time, post_title = post_title, post_link = post_link))
+    
         # print("заголовок", post_title)
         # print("дата", post_date)
         # print("ссылка", post_link)
